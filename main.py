@@ -13,11 +13,17 @@ from wx.lib.wordwrap import wordwrap
 
 
 class Boomslang(wx.Frame):
-
+    """
+    Class to create and manage the Boomslang application.
+    """
+    # TODO: All of the methods in this class that return nothing should probably be changed to return their success status, if nothing else.
+    
     def __init__(self):
-        self.size = (800, 600)
-        wx.Frame.__init__(self, parent=None, title='Boomslang XML',
-                          size=(800, 600))
+        """
+        Creates the Boomslang Application Instance using sensible defaults
+        """
+        self.size = wx.Size(800, 600)
+        wx.Frame.__init__(self, parent=None, title='Boomslang XML', size=self.size)
 
         self.full_tmp_path = ''
         self.full_saved_path = ''
@@ -45,10 +51,13 @@ class Boomslang(wx.Frame):
 
         self.Show()
 
-    def create_new_editor(self, xml_path):
+    def create_new_editor(self, xml_path: str) -> None:
         """
-        Create the tree and xml editing widgets when the user loads
-        an XML file
+        Create the tree and xml editing widgets when the user loads an XML file
+
+        :param xml_path: The filesystem path to the xml file
+        :type xml_path: str
+        :return: None
         """
         if not self.notebook:
             self.notebook = fnb.FlatNotebook(
@@ -72,10 +81,9 @@ class Boomslang(wx.Frame):
 
         self.panel.Layout()
 
-    def create_menu_and_toolbar(self):
+    def create_menu_and_toolbar(self) -> None:
         """
-        Creates the menu bar, menu items, toolbar and accelerator table
-        for the main frame
+        Creates the menu bar, menu items, toolbar and accelerator table for the main frame.
         """
         menu_bar = wx.MenuBar()
         file_menu = wx.Menu()
@@ -169,9 +177,14 @@ class Boomslang(wx.Frame):
         msg = 'Welcome to Boomslang XML (c) Michael Driscoll - 2017-2019'
         self.status_bar.SetStatusText(msg)
 
-    def create_recent_items(self):
+    def create_recent_items(self) -> wx.Menu:
         """
         Create the recent items sub_menu and return it
+
+        The recent items menu is read from the file 'requirements.txt' located in the directory of the boomslang code files. Each line represents a single xml file that has been previously opened.
+        When a file already present on the list is opened, the new file is moved to the top of the list.
+        :return: A menu item that contains all the most recent files as entries, so that users can click to open a recent file.
+        :rtype: wx.Menu
         """
         self.recent_dict = {}
         if os.path.exists(self.recent_files_path):
@@ -187,41 +200,51 @@ class Boomslang(wx.Frame):
                                   id=menu_id)
                 return submenu
             except:
+                # TODO: For code elegance we should really define a boomslang error type and raise/handle it here for certain situations. Most obvious is file not found error
                 pass
 
-    def auto_save_status(self, save_path):
+    def auto_save_status(self, save_path : str) -> None:
         """
         This function is called via PubSub to update the frame's status
+
+        :param save_path: file system path to save to
+        :type save_path: str
         """
-        print('Autosaving to {} @ {}'.format(save_path, time.ctime()))
-        msg = 'Autosaved at {}'.format(time.strftime('%H:%M:%S',
-                                                     time.localtime()))
+        print(f"Autosaving to {save_path} @ {time.ctime()}")
+        msg = f"Autosaved at {time.strftime('%H:%M:%S', time.localtime())}"
         self.status_bar.SetStatusText(msg)
 
         self.changed = True
 
-    def open_xml_file(self, xml_path):
+    def open_xml_file(self, xml_path : str) -> None:
         """
-        Open the specified XML file and load it in the application
+        Controller to open the specified XML file and load it in the application
+
+        :param xml_path: The string filesystem path to the xml file to open
+        :type xml_path: str
         """
+        # TODO: This seems to default to the last file opened, despite no default... Why??? Is pubsub providing the file?
         self.create_new_editor(xml_path)
 
-    def save(self, location=None):
+    def save(self, location : str = None) -> None:
         """
         Update the frame with save status
+
+        :param location: The location to save the current xml file to
+        :type location: str
         """
+        # TODO: This is another case where a custom Boomslang error type would be useful to conduct warnings and give errors.
         if self.current_page.xml_root is None:
             utils.warn_nothing_to_save()
             return
 
-        pub.sendMessage('save_{}'.format(self.current_page.page_id))
+        pub.sendMessage(f"save_{self.current_page.page_id}")
 
         self.changed = False
-        msg = 'Last saved at {}'.format(time.strftime('%H:%M:%S',
-                                                      time.localtime()))
+        msg = f"Last saved at {time.strftime('%H:%M:%S', time.localtime()))}"
         self.status_bar.SetStatusText(msg)
 
-    def on_about_box(self, event):
+    def on_about_box(self, event : wx.Event) -> None:
         """
         Event handler that builds and shows an about box
         """
@@ -240,20 +263,20 @@ class Boomslang(wx.Frame):
         # Show the wx.AboutBox
         wx.adv.AboutBox(info)
 
-    def on_add_node(self, event):
+    def on_add_node(self, event : wx.Event) -> None:
         """
         Event handler that is fired when an XML node is added to the
         selected node
         """
-        pub.sendMessage('add_node_{}'.format(self.current_page.page_id))
+        pub.sendMessage(f"add_node_{self.current_page.page_id}")
 
-    def on_remove_node(self, event):
+    def on_remove_node(self, event : wx.Event) -> None:
         """
         Event handler that is fired when an XML node is removed
         """
-        pub.sendMessage('remove_node_{}'.format(self.current_page.page_id))
+        pub.sendMessage(f"remove_node_{self.current_page.page_id}")
 
-    def on_open(self, event):
+    def on_open(self, event : wx.Event) -> None:
         """
         Event handler that is called when you need to open an XML file
         """
@@ -264,17 +287,18 @@ class Boomslang(wx.Frame):
             self.open_xml_file(xml_path)
             self.update_recent_files(xml_path)
 
-    def on_page_closing(self, event):
+    def on_page_closing(self, event : wx.Event) -> None:
         """
         Event handler that is called when a page in the notebook is closing
         """
+        print(f"on_page_closing method called, event type is {type(event)}")
         page = self.notebook.GetCurrentPage()
         page.Close()
         if not self.opened_files:
             wx.CallAfter(self.notebook.Destroy)
             self.notebook = None
 
-    def on_preview_xml(self, event):
+    def on_preview_xml(self, event : wx.Event) -> None:
         """
         Event handler called for previewing the current state of the XML
         in memory
@@ -285,10 +309,14 @@ class Boomslang(wx.Frame):
             previewer.ShowModal()
             previewer.Destroy()
 
-    def update_recent_files(self, xml_path):
+    def update_recent_files(self, xml_path : str) -> None:
         """
         Update the recent files file
+
+        :param xml_path: The xml file path to add to the recent files file
+        :type xml_path: str
         """
+        # TODO: Use boomslang error type that doesn't explicitly silence all errors... Alternatively, just use a single try/catch block for the whole method.
         lines = []
         try:
             with open(self.recent_files_path) as fobj:
@@ -324,29 +352,29 @@ class Boomslang(wx.Frame):
             except:
                 pass
 
-    def on_open_recent_file(self, event):
+    def on_open_recent_file(self, event : wx.Event) -> None:
         """
         Event handler that is called when a recent file is selected
         for opening
         """
         self.open_xml_file(self.recent_dict[event.GetInt()])
 
-    def on_save(self, event):
+    def on_save(self, event : wx.Event) -> None:
         """
         Event handler that saves the data to disk
         """
         self.save()
 
-    def on_exit(self, event):
+    def on_exit(self, event : wx.Event) -> None:
         """
         Event handler that closes the application
         """
         self.Destroy()
 
+
 # ------------------------------------------------------------------------------
 # Run the program!
 if __name__ == '__main__':
-    xml_path = 'books.xml'
     app = wx.App(redirect=False)
     frame = Boomslang()
     app.MainLoop()
