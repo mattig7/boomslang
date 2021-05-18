@@ -241,7 +241,7 @@ class Boomslang(wx.Frame):
         pub.sendMessage(f"save_{self.current_page.page_id}")
 
         self.changed = False
-        msg = f"Last saved at {time.strftime('%H:%M:%S', time.localtime()))}"
+        msg = f"Last saved at {time.strftime('%H:%M:%S', time.localtime())}"
         self.status_bar.SetStatusText(msg)
 
     def on_about_box(self, event : wx.Event) -> None:

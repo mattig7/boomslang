@@ -3,6 +3,7 @@ import wx.lib.scrolledpanel as scrolled
 
 from functools import partial
 from pubsub import pub
+import lxml
 
 
 class XmlEditorPanel(scrolled.ScrolledPanel):
@@ -10,8 +11,15 @@ class XmlEditorPanel(scrolled.ScrolledPanel):
     The panel in the notebook that allows editing of XML element values
     """
 
-    def __init__(self, parent, page_id):
-        """Constructor"""
+    def __init__(self, parent : wx.Window, page_id : int) -> None:
+        """
+        Basic Constructor
+
+        :param parent: The parent window of this editor
+        :type parent: wx.Window
+        :param page_id: The id of the page to be displayed
+        :type id: int
+        """
         scrolled.ScrolledPanel.__init__(
             self, parent, style=wx.SUNKEN_BORDER)
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -19,13 +27,16 @@ class XmlEditorPanel(scrolled.ScrolledPanel):
         self.widgets = []
         self.label_spacer = None
 
-        pub.subscribe(self.update_ui, 'ui_updater_{}'.format(self.page_id))
+        pub.subscribe(self.update_ui, f"ui_updater_{self.page_id}")
 
         self.SetSizer(self.main_sizer)
 
-    def update_ui(self, xml_obj):
+    def update_ui(self, xml_obj : str) -> None:
         """
         Update the panel's user interface based on the data
+
+        :param xml_obj: The xml objec that is to be updated on the display
+        :type xml_obj: lxml.etree
         """
         self.label_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.clear()
@@ -70,12 +81,15 @@ class XmlEditorPanel(scrolled.ScrolledPanel):
             self.SetAutoLayout(1)
             self.SetupScrolling()
 
-    def add_single_tag_elements(self, xml_obj, lbl_size):
+    def add_single_tag_elements(self, xml_obj : lxml.etree, lbl_size : wx.Size) -> None:
         """
         Adds the single tag elements to the panel
 
-        This function is only called when there should be just one
-        tag / value
+        This function is only called when there should be just one tag / value.
+        It creates the objects in place by adding them to self. main_sizer and self.widgets
+        As a result, it doesn't return anything
+        :param xml_obj: The xml object to display as a single element
+        :type xml_obj: lxml.etree
         """
         sizer = wx.BoxSizer(wx.HORIZONTAL)
         tag_txt = wx.StaticText(self, label=xml_obj.tag, size=lbl_size)
@@ -90,7 +104,7 @@ class XmlEditorPanel(scrolled.ScrolledPanel):
 
         self.main_sizer.Add(sizer, 0, wx.EXPAND)
 
-    def clear(self):
+    def clear(self) -> None:
         """
         Clears the widgets from the panel in preparation for an update
         """
@@ -109,18 +123,26 @@ class XmlEditorPanel(scrolled.ScrolledPanel):
         self.widgets = []
         self.Layout()
 
-    def on_text_change(self, event, xml_obj):
+    def on_text_change(self, event : wx.Event, xml_obj : lxml.etree):
         """
-        An event handler that is called when the text changes in the text
-        control. This will update the passed in xml object to something
-        new
+        An event handler that is called when the text changes in the text control.
+
+        This will update the passed in xml object to something
+        new.
+        :param event: The event that is raised when text is changed on a text box
+        :type event: wx.Event
+        :param xml_obj: The xml object that has been changed
+        :type xml_obj: lxml.etree
         """
+        # TODO: This needs to change in order for tags to be able to be changed as well as values.
         xml_obj.text = event.GetString()
-        pub.sendMessage('on_change_{}'.format(self.page_id),
+        pub.sendMessage(f"on_change_{self.page_id}",
                         event=None)
 
     def on_add_node(self, event):
         """
         Event handler that adds an XML node using pubsub
+        :param event: The event called on adding a node
+        :type event: wx.Event
         """
-        pub.sendMessage('add_node_{}'.format(self.page_id))
+        pub.sendMessage(f"add_node_{self.page_id}")
