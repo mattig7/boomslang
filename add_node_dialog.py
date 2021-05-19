@@ -7,7 +7,7 @@ from pubsub import pub
 
 class NodeDialog(EditDialog):
     """
-    A class for adding nodes to your XML objects
+    A class for adding nodes to your XML objects.
     """
 
     def on_save(self, event):
@@ -18,14 +18,13 @@ class NodeDialog(EditDialog):
         Updates the XML object with the new node element and
         tells the UI to update to display the new element
         before destroying the dialog
+        :param event: The event called when the save button is pressed
+        :type event: wx.Event
         """
-        element = ET.SubElement(
-            self.xml_obj, self.value_one.GetValue())
+        element = ET.SubElement(self.xml_obj, self.value_one.GetValue())
         element.text = self.value_two.GetValue()
-        pub.sendMessage('tree_update_{}'.format(self.page_id),
-                        xml_obj=element)
-        pub.sendMessage('on_change_{}'.format(self.page_id),
-                        event=None)
+        pub.sendMessage(f"tree_update_{self.page_id}", xml_obj=element)
+        pub.sendMessage(f"on_change_{self.page_id}", event=None)
         self.Close()
 
 if __name__ == '__main__':
