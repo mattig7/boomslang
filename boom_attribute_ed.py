@@ -3,15 +3,22 @@ import wx
 from attribute_dialog import AttributeDialog
 from functools import partial
 from pubsub import pub
+import lxml.etree
 
 
 class State():
     """
-    Class for keeping track of the state of the key portion
-    of the attribute
+    Class for keeping track of the state of the key portion of the attribute.
+    This is needed to know what the key was prior to the change that is sent through pubsub.
     """
-
-    def __init__(self, key, val_widget):
+    # TODO: refactor State class to be a dataclass. Or even a named tuple
+    def __init__(self, key : str, val_widget : wx.TextCtrl):
+        """
+        :param key: The string that is the 'key' of an attribute
+        :type key: str
+        :param val_widget: The Text Control widget that holds the value for this attribute
+        :type val_widget: wx.TextCtrl
+        """
         self.current_key = key
         self.previous_key = None
         self.val_widget = val_widget
@@ -20,26 +27,37 @@ class State():
 class AttributeEditorPanel(wx.Panel):
     """
     A class that holds all UI elements for editing
-    XML attribute elements
+    XML attribute elements. Each XML node can have multiple attributes
     """
 
-    def __init__(self, parent, page_id):
+    def __init__(self, parent : wx.Window, page_id : int) -> None:
+        """
+        Constructor
+
+        :param parent: The parent panel for the new AtrributeEditorPanel
+        :type parent: wx.Window
+        :param page_id: The page id this AttributeEditorPanel relates to.
+        :type page_id: int
+        """
         wx.Panel.__init__(self, parent)
         self.page_id = page_id
         self.xml_obj = None
         self.widgets = []
 
-        pub.subscribe(self.update_ui, 'ui_updater_{}'.format(self.page_id))
+        pub.subscribe(self.update_ui, f"ui_updater_{self.page_id}")
 
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
         self.SetSizer(self.main_sizer)
 
-    def update_ui(self, xml_obj):
+    def update_ui(self, xml_obj : lxml.etree) -> None:
         """
         Update the user interface to have elements for editing
         XML attributes
 
-        Called via pubsub
+        This method is called via pubsub and is linked to 'ui_updater_<page-id>' message
+        
+        :param xml_obj: The xml_obj that relates to this page id
+        :type xml_obj: lxml.etree
         """
         self.clear()
         self.xml_obj = xml_obj
@@ -86,9 +104,12 @@ class AttributeEditorPanel(wx.Panel):
 
         self.Layout()
 
-    def on_add_attr(self, event):
+    def on_add_attr(self, event : wx.Event) -> None:
         """
-        Event handler to add an attribute
+        Event handler to create a dialog for adding a new attribute to a node
+        
+        :param event: The event called upon adding an attribute.
+        :type event: wx.Event
         """
         dlg = AttributeDialog(
             self.xml_obj,
@@ -99,7 +120,7 @@ class AttributeEditorPanel(wx.Panel):
         )
         dlg.Destroy()
 
-    def clear(self):
+    def clear(self) -> None:
         """
         Clears the panel of widgets
         """
@@ -118,10 +139,15 @@ class AttributeEditorPanel(wx.Panel):
         self.widgets = []
         self.Layout()
 
-    def on_key_change(self, event, state):
+    def on_key_change(self, event : wx.Event, state : State) -> None:
         """
         Event handler that is called on text change in the
         attribute key field
+
+        :param event: The event object triggered on key change
+        :type event: wx.Event
+        :param state: The State object that gives the changed text control and the previous xml attribute key
+        :type state: State
         """
         new_key = event.GetString()
         if new_key not in self.xml_obj.attrib:
@@ -130,15 +156,17 @@ class AttributeEditorPanel(wx.Panel):
             self.xml_obj.attrib[new_key] = state.val_widget.GetValue()
             state.previous_key = state.current_key
             state.current_key = new_key
-            pub.sendMessage('on_change_{}'.format(self.page_id),
-                            event=None)
+            pub.sendMessage(f"on_change_{self.page_id}", event=None)
 
-    def on_val_change(self, event, attr):
+    def on_val_change(self, event : wx.Event, attr : wx.TextCtrl) -> None:
         """
-        Event handler that is called on text change in the
-        attribute value field
+        Event handler that is called on text change in the attribute value field.
+
+        :param event: Event that is created upon text change
+        :type event: wx.Event
+        :param attr: The text Control widget that is being used to change the attribute value.
+        :type attr: wx.TextCtrl
         """
         new_val = event.GetString()
         self.xml_obj.attrib[attr.GetValue()] = new_val
-        pub.sendMessage('on_change_{}'.format(self.page_id),
-                        event=None)
+        pub.sendMessage(f"on_change_{self.page_id}", event=None)
