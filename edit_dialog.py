@@ -1,4 +1,5 @@
 import wx
+import lxml.etree
 
 class EditDialog(wx.Dialog):
     """
@@ -6,13 +7,18 @@ class EditDialog(wx.Dialog):
     dialogs from
     """
 
-    def __init__(self, xml_obj, page_id, title, label_one, label_two):
+    def __init__(self, xml_obj : lxml.etree, page_id : int, title : str, label_one : str, label_two : str) -> None:
         """
-        @param xml_obj: The lxml XML object
-        @param page_id: A unique id based on the current page being viewed
-        @param title: The title of the dialog
-        @param label_one: The label text for the first text control
-        @param label_two: The label text for the second text control
+        :param xml_obj: The lxml XML object being edited
+        :type xml_obj: lxml.etree
+        :param page_id: A unique id based on the current page being viewed
+        :type page_id: int
+        :param title: The title of the dialog
+        :type title: str
+        :param label_one: The label text for the first text control
+        :type label_one: str
+        :param label_two: The label text for the second text control
+        :type label_two: str
         """
         wx.Dialog.__init__(self, None, title=title)
         self.xml_obj = xml_obj
@@ -49,10 +55,13 @@ class EditDialog(wx.Dialog):
 
         self.ShowModal()
 
-    def on_enter(self, event):
+    def on_enter(self, event : wx.Event) -> None:
         """
         Event handler that fires when a key is pressed in the
         attribute value text control
+
+        :param event: The event fired when entering the text control
+        :type event: wx.Event
         """
         keycode = event.GetKeyCode()
         if keycode == wx.WXK_RETURN or keycode == wx.WXK_NUMPAD_ENTER:
@@ -65,5 +74,7 @@ class EditDialog(wx.Dialog):
         pressed.
 
         Will destroy the dialog
+        :param event: The event called when Cancel button is pressed.
+        :type event: wx.Event
         """
         self.Close()

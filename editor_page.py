@@ -12,11 +12,22 @@ from pubsub import pub
 
 class NewPage(wx.Panel):
     """
-    Create a new page for each opened XML document. This is the
-    top-level widget for the majority of the application
+    Create a new page for an opened XML document. This is the top-level widget for the majority of the application
     """
+    # TODO: Clean this method up using the pathlib.Path module (edit all other files that use os.path as well)
+    def __init__(self, parent : wx.Window, xml_path : str, size : wx.Size, opened_files : list) -> None:
+        """
+        Constructor
 
-    def __init__(self, parent, xml_path, size, opened_files):
+        :param parent: The parent of this :class NewPage: widget
+        :type parent: wx.Window
+        :param xml_path: The file system path to the xml file being opened
+        :type xml_path: str
+        :param size: The initial size of the created :class NewPage: widget
+        :type size: wx.Size
+        :param opened_files: The list of files that are opened in this instance of boomslang.
+        :type opened_files: list
+        """
         wx.Panel.__init__(self, parent)
         self.page_id = id(self)
         self.xml_root = None
@@ -24,13 +35,13 @@ class NewPage(wx.Panel):
         self.opened_files = opened_files
         self.current_file = xml_path
         self.title = os.path.basename(xml_path)
-
+        
         self.app_location = os.path.dirname(os.path.abspath( sys.argv[0] ))
 
         self.tmp_location = os.path.join(self.app_location, 'drafts')
 
-        pub.subscribe(self.save, 'save_{}'.format(self.page_id))
-        pub.subscribe(self.auto_save, 'on_change_{}'.format(self.page_id))
+        pub.subscribe(self.save, f"save_{self.page_id}")
+        pub.subscribe(self.auto_save, f"on_change_{self.page_id}")
 
         self.parse_xml(xml_path)
 
@@ -49,9 +60,11 @@ class NewPage(wx.Panel):
         if self.xml_root is not None:
             self.create_editor()
 
-    def create_editor(self):
+    def create_editor(self) -> None:
         """
         Create the XML editor widgets
+
+        A helper method that creates the various sub-widgets required to display an editor page.
         """
         page_sizer = wx.BoxSizer(wx.VERTICAL)
 
@@ -75,17 +88,23 @@ class NewPage(wx.Panel):
 
         self.Bind(wx.EVT_CLOSE, self.on_close)
 
-    def auto_save(self, event):
+    def auto_save(self, event : wx.Event) -> None:
         """
         Event handler that is called via pubsub to save the
         current version of the XML to disk in a temporary location
+
+        :param event: The event that is called to auto save this editor page.
+        :type event: wx.Event
         """
         self.xml_tree.write(self.full_tmp_path)
         pub.sendMessage('on_change_status', save_path=self.full_tmp_path)
 
-    def parse_xml(self, xml_path):
+    def parse_xml(self, xml_path : str):
         """
         Parses the XML from the file that is passed in
+
+        :param xml_path: The string file system path to the xml file to be opened
+        :type xml_path: str
         """
         self.current_directory = os.path.dirname(xml_path)
         try:
@@ -100,9 +119,12 @@ class NewPage(wx.Panel):
 
         self.xml_root = self.xml_tree.getroot()
 
-    def save(self, location=None):
+    def save(self, location : str = None):
         """
         Save the XML to disk
+
+        :param location: The string file system path (including file name and suffix) to save the current xml file to.
+        :type location: str
         """
         if not location:
             path = utils.save_file(self)
@@ -120,6 +142,9 @@ class NewPage(wx.Panel):
     def on_close(self, event):
         """
         Event handler that is called when the panel is being closed
+
+        :param event: The event that is called on close of this editor
+        :type event: wx.Event
         """
         if self.current_file in self.opened_files:
             self.opened_files.remove(self.current_file)
@@ -128,4 +153,4 @@ class NewPage(wx.Panel):
             try:
                 os.remove(self.full_tmp_path)
             except IOError:
-                print('Unable to delete file: {}'.format(self.full_tmp_path))
+                print(f"Unable to delete file: {self.full_tmp_path}")
