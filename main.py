@@ -57,7 +57,6 @@ class Boomslang(wx.Frame):
 
         :param xml_path: The filesystem path to the xml file
         :type xml_path: str
-        :return: None
         """
         if not self.notebook:
             self.notebook = fnb.FlatNotebook(
@@ -84,6 +83,7 @@ class Boomslang(wx.Frame):
     def create_menu_and_toolbar(self) -> None:
         """
         Creates the menu bar, menu items, toolbar and accelerator table for the main frame.
+        # TODO: Create menus and toolbar as a class for better control and code simplicity
         """
         menu_bar = wx.MenuBar()
         file_menu = wx.Menu()
@@ -247,6 +247,8 @@ class Boomslang(wx.Frame):
     def on_about_box(self, event : wx.Event) -> None:
         """
         Event handler that builds and shows an about box
+        :param event: The event triggering the opening of the about box
+        :type event: wx.Event
         """
         info = wx.adv.AboutDialogInfo()
         info.Name = "About Boomslang"
@@ -265,20 +267,28 @@ class Boomslang(wx.Frame):
 
     def on_add_node(self, event : wx.Event) -> None:
         """
-        Event handler that is fired when an XML node is added to the
-        selected node
+        Event handler that is fired when an XML node is added to the selected node
+
+        :param event: The event that was fired to add an XML node
+        :type event: wx.Event
         """
         pub.sendMessage(f"add_node_{self.current_page.page_id}")
 
     def on_remove_node(self, event : wx.Event) -> None:
         """
         Event handler that is fired when an XML node is removed
+
+        :param event: Event that was fired to remove a node.
+        :type event: wx.Event
         """
         pub.sendMessage(f"remove_node_{self.current_page.page_id}")
 
     def on_open(self, event : wx.Event) -> None:
         """
         Event handler that is called when you need to open an XML file
+
+        :param event: The event called to open an XML file.
+        :type event: wx.Event
         """
         xml_path = utils.open_file(self)
 
@@ -290,6 +300,9 @@ class Boomslang(wx.Frame):
     def on_page_closing(self, event : wx.Event) -> None:
         """
         Event handler that is called when a page in the notebook is closing
+
+        :param event: The event triggered by a page closing
+        :type event: wx.Event
         """
         print(f"on_page_closing method called, event type is {type(event)}")
         page = self.notebook.GetCurrentPage()
@@ -300,8 +313,10 @@ class Boomslang(wx.Frame):
 
     def on_preview_xml(self, event : wx.Event) -> None:
         """
-        Event handler called for previewing the current state of the XML
-        in memory
+        Event handler called for previewing the current state of the XML in memory
+
+        :param event: The event called to preview current XML state
+        :type event: wx.Event
         """
         if self.last_opened_file:
             previewer = XmlViewer(
@@ -354,20 +369,28 @@ class Boomslang(wx.Frame):
 
     def on_open_recent_file(self, event : wx.Event) -> None:
         """
-        Event handler that is called when a recent file is selected
-        for opening
+        Event handler that is called when a recent file is selected for opening.
+
+        :param event: The event called when file is selected for opening.
+        :type event: wx.Event
         """
         self.open_xml_file(self.recent_dict[event.GetInt()])
 
     def on_save(self, event : wx.Event) -> None:
         """
         Event handler that saves the data to disk
+
+        :param event: The event triggering a save to disk.
+        :type event: wx.Event
         """
         self.save()
 
     def on_exit(self, event : wx.Event) -> None:
         """
         Event handler that closes the application
+        
+        :param event: The event called to close the application.
+        :type event: wx.Event
         """
         self.Destroy()
 
