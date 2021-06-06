@@ -1,2 +1,3 @@
 lxml
 pypubsub
+wxPython==4.1.1

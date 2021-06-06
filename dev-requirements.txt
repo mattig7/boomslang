@@ -1,0 +1,5 @@
+
+lxml==4.6.3
+Pypubsub==4.0.3
+Sphinx==4.0.2
+wxPython==4.1.1

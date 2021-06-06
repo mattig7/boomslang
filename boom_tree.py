@@ -13,6 +13,7 @@ class XmlTree(wx.TreeCtrl):
     def __init__(self, parent : wx.Window, wx_id : int, pos : wx.Point, size : wx.Size, style : float) -> None:
         """
         Basic Constructor for XmlTree class. It obtains the xml object from the parent window's : and displays.
+        
         :param parent: The parent window for this XmlTree
         :type parent: :class wx.Window:
         :param id: The id to be used for this window. In boomslang this is set to the page id (of the parent)
@@ -51,6 +52,7 @@ class XmlTree(wx.TreeCtrl):
         Add provided items to this tree control
 
         Goes through all children within the *book* and adds them as children to the passed in *item* within this :class XmlTree:.
+        
         :param item: The item to add to this :class XmlTree:
         :type item: lxml.etree
         :param book: The xml items to add under the provided *item* within this :class XmlTree:.
@@ -67,6 +69,7 @@ class XmlTree(wx.TreeCtrl):
 
         This will cause the sub-elements of the tree to be created
         and added to the tree
+
         :param event: The event that triggers the tree expansion.
         :type event: wx.Event
         """
@@ -99,6 +102,7 @@ class XmlTree(wx.TreeCtrl):
     def update_tree(self, xml_obj : lxml.etree):
         """
         Updates the tree with the new data provided
+        
         :param xml_obj: The xml object to update the tree with
         :type xml_obj: lxml.etree
         """
@@ -204,6 +208,7 @@ class BoomTreePanel(wx.Panel):
     def on_paste(self, event):
         """
         Paste / Append the copied XML data to the selected node
+        
         :param event: The event triggering a copy
         :type event: wx.Event
         """

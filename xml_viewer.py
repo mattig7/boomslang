@@ -2,8 +2,19 @@ import wx
 import wx.stc as stc
 
 class XmlSTC(stc.StyledTextCtrl):
-
+    """
+    Text control object that displays an xml file
+    """
+    
     def __init__(self, parent, xml_file):
+        """
+        Basic Constructor
+
+        :param parent: The parent component of this new XmlSTC
+        :type parent: wx.Window
+        :param xml_file: The filesystem path to the xml file to display in this text control object
+        :type xml_file: str
+        """
         stc.StyledTextCtrl.__init__(self, parent)
 
         self.SetLexer(stc.STC_LEX_XML)
@@ -34,8 +45,17 @@ class XmlSTC(stc.StyledTextCtrl):
 
 
 class XmlViewer(wx.Dialog):
+    """
+    Dialog box class for displaying a complete xml file
+    """
 
     def __init__(self, xml_file):
+        """
+        Basic Constructor
+
+        :param xml_file: The filesystem path to the xml file being displayed
+        :type xml_file: str
+        """
         wx.Dialog.__init__(self, parent=None, title='XML Viewer',
                            style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
         self.xml_view = XmlSTC(self, xml_file)
