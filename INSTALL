@@ -8,4 +8,13 @@ You will need the following installed:
  - wxPython 4+
  - lxml 3.8+
 
-Assuming all of the above is installed, then all you need to do is download the code from Github and run main.py
+The easiest way to conduct the installation of packages (assuming python is installed correctly) is to navigate to the installed boomslang folder and use the command:
+python -m pip install -r requirements.txt
+
+A virtual environment is recommended. Create one with the command:
+python -m venv env
+Then activate the virtual environment with the (linux) command:
+source env/Scripts/activate
+
+
+Assuming all of the above is installed, then all you need to do is run main.py.

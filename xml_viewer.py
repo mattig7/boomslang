@@ -3,16 +3,16 @@ import wx.stc as stc
 
 class XmlSTC(stc.StyledTextCtrl):
     """
-    Text control object that displays an xml file
+    Class to view the raw text of an XML file.
     """
-    
-    def __init__(self, parent, xml_file):
+    #TODO: My version displays the whole xml file text on one line, rather than providing a new line for every xml node begin and end... Fix this.
+    def __init__(self, parent: wx.Window, xml_file: str) -> None:
         """
-        Basic Constructor
+        Basic constructor of XML Styled Text Control
 
-        :param parent: The parent component of this new XmlSTC
+        :param parent: The parent window for this object
         :type parent: wx.Window
-        :param xml_file: The filesystem path to the xml file to display in this text control object
+        :param xml_file: The xml file to display
         :type xml_file: str
         """
         stc.StyledTextCtrl.__init__(self, parent)
@@ -38,6 +38,7 @@ class XmlSTC(stc.StyledTextCtrl):
         # Attribute
         self.StyleSetSpec(stc.STC_H_ATTRIBUTE, "fore:#FF5733,size:%(size)d" % faces)
 
+        # TODO: I think the below means that the XML view will only show the saved version of the XML (not any unsaved changes made)
         with open(xml_file) as fobj:
             text = fobj.read()
 
@@ -46,14 +47,14 @@ class XmlSTC(stc.StyledTextCtrl):
 
 class XmlViewer(wx.Dialog):
     """
-    Dialog box class for displaying a complete xml file
+    Viewer dialog for displaying the XML styled text control
     """
-
-    def __init__(self, xml_file):
+    
+    def __init__(self, xml_file: str) -> None:
         """
-        Basic Constructor
+        Basic constructor for an XmlViewer dialog
 
-        :param xml_file: The filesystem path to the xml file being displayed
+        :param xml_file: The xml file that this XmlViewer will display
         :type xml_file: str
         """
         wx.Dialog.__init__(self, parent=None, title='XML Viewer',
